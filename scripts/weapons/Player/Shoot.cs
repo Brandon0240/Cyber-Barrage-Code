@@ -5,7 +5,7 @@ using UnityEngine;
 public class Shoot : MonoBehaviour
 {
     public Transform[] firePoints;
-   // public Transform firePoint;
+    // public Transform firePoint;
     public GameObject bulletPrefab;
     private float fireRate = 0.1f;
     private float nextFireTime = 0f;
@@ -14,6 +14,8 @@ public class Shoot : MonoBehaviour
     private GunName gunName;
 
     private GunRecoil gunRecoil;
+
+    public AudioSource fireAudioSource;
     void Start()
     {
 
@@ -26,12 +28,12 @@ public class Shoot : MonoBehaviour
             Debug.LogError("gunName null");
             return;
         }
-        
-      //  Debug.Log(gunName.getName());
+
+        //  Debug.Log(gunName.getName());
         if (gunStatSheet != null)
         {
-            GunStats gunStats = gunStatSheet.GetGunStats(gunName.getName()); 
-            fireRate = gunStats.fireRate; 
+            GunStats gunStats = gunStatSheet.GetGunStats(gunName.getName()); // Get gun stats based on current ammo type
+            fireRate = gunStats.fireRate; // Assign fire rate from GunStatSheet
             //Debug.Log(gameObject.tag + ": " + fireRate);
         }
         else
@@ -46,11 +48,15 @@ public class Shoot : MonoBehaviour
         if (Input.GetMouseButton(0) && Time.time >= nextFireTime && ammoManager.GetCurrentAmmo() > 0)
         {
             ammoManager.useAmmo();
-            
+
             firePointsInstantiation();
+            if (fireAudioSource != null)
+            {
+                fireAudioSource.Play();
+            }
             if (gunRecoil != null)
             {
-                gunRecoil.ApplyRecoil(); 
+                gunRecoil.ApplyRecoil(); // Trigger recoil effect
             }
             nextFireTime = Time.time + fireRate;
         }
@@ -63,32 +69,32 @@ public class Shoot : MonoBehaviour
         }
         else
         {
-          //  Debug.Log(gameObject.name + " parent: " + transform.parent.name + " | Tag: " + transform.parent.tag);
+            //  Debug.Log(gameObject.name + " parent: " + transform.parent.name + " | Tag: " + transform.parent.tag);
         }
         foreach (Transform firePoint in firePoints)
         {
             GameObject bulletInstance = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-           
+
             ShooterTag bulletScript = bulletInstance.GetComponent<ShooterTag>();
-            
+
             if (bulletScript != null)
             {
-               
-               
-                bulletScript.SetShooterTag(transform.parent.tag); 
-               // Debug.Log("transform.parent.tag: " + transform.parent.tag);
+
+
+                bulletScript.SetShooterTag(transform.parent.tag); // Assign the shooter's tag to the bullet
+                                                                  // Debug.Log("transform.parent.tag: " + transform.parent.tag);
             }
             else
             {
                 Debug.Log("bulletScript == null");
             }
-            
+
 
         }
     }
     void Update()
     {
         Fire();
-        
+
     }
 }
